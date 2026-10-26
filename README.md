@@ -1,6 +1,6 @@
-# Daymark
+# Day 1
 
-A calm, calendar-first day trading journal. Built with React, Vite, Lucide icons, and IndexedDB. No account, API key, or external service is required.
+A dark, spacious, calendar-first day trading journal. Built with React, Vite, Lucide icons, and IndexedDB. No account, API key, or external service is required.
 
 ## Develop
 
@@ -35,3 +35,5 @@ Browser tests use `/usr/bin/chromium` by default. Set `CHROMIUM_PATH` to a diffe
 Data stays in this browser's IndexedDB on this device and origin. Clearing site data removes entries. Export regularly; there is no cloud sync, login, broker import, trade-by-trade ledger, or brokerage connection. P&L is entered manually in USD, not calculated from fills. Win rate is winning trades / total trades; green and red days refer to daily net P&L. Rule checks and tags are self-reported. This is a reflection tool, not a source of trading advice.
 
 See [comparison and design decisions](docs/comparison.md) for the competitor-informed changes and remaining gaps.
+
+The interface uses a charcoal/grey theme, larger text, and touch-friendly controls. Existing Daymark browser data and backups remain compatible; the internal storage name is intentionally unchanged.

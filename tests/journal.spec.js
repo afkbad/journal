@@ -124,7 +124,7 @@ test("backup exports and restores notes and images; malformed files preserve exi
       buffer: Buffer.from('{"entries": {"bad": {}}}'),
     });
   await expect(page.getByRole("status")).toContainText(
-    "not a valid Daymark backup",
+    "not a valid Day 1 backup",
   );
   await expect(page.getByText("+$250.50").first()).toBeVisible();
 });

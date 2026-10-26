@@ -157,7 +157,7 @@ function App() {
         <div className="brand-mark">
           <Activity size={23} />
         </div>
-        <h2>Daymark</h2>
+        <h2>Day 1</h2>
         <p role="status">{error || "Opening your journal…"}</p>
       </div>
     );
@@ -234,7 +234,7 @@ function App() {
       setImportCandidate(next);
     } catch {
       setNotice(
-        "That file is not a valid Daymark backup. Your journal has not changed.",
+        "That file is not a valid Day 1 backup. Your journal has not changed.",
       );
     } finally {
       if (importRef.current) importRef.current.value = "";
@@ -255,7 +255,7 @@ function App() {
     );
     const a = document.createElement("a");
     a.href = url;
-    a.download = `daymark-${dateKey(new Date())}.json`;
+    a.download = `day-1-${dateKey(new Date())}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
@@ -276,7 +276,7 @@ function App() {
           <span className="brand-mark">
             <Activity size={25} strokeWidth={2} />
           </span>
-          daymark<span className="brand-dot">.</span>
+          Day 1<span className="brand-dot">.</span>
         </a>
         <div className="workspace">
           <div className="avatar">Y</div>
@@ -500,7 +500,12 @@ function App() {
                 </div>
               </div>
               {view === "calendar" ? (
-                <>
+                <div
+                  className="calendar-scroll"
+                  tabIndex={0}
+                  role="region"
+                  aria-label="Monthly calendar, scroll horizontally to see all days"
+                >
                   <div className="weekday-row">
                     {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map(
                       (d) => (
@@ -551,7 +556,7 @@ function App() {
                       );
                     })}
                   </div>
-                </>
+                </div>
               ) : (
                 <div className="weekly-list">
                   {weekDays.map((d) => {
