@@ -1,24 +1,37 @@
-# Trading journal comparison and improvements
+# Day 1: trading-journal research and improvements
 
-Prepared October 26, 2026. Direct requests to the official sites below were rejected by this environment's egress proxy (403). The comparison uses established product positioning and common trading-journal workflows, not a verified audit of their current plans or feature availability. Pricing and current feature claims are intentionally omitted.
+Research checked October 26, 2026. This pass reviewed the maintainers’ published GitHub documentation linked below. It did not run those products or independently verify their hosted services. Direct requests to TradeZella, TraderSync, Tradervue’s commercial site, and Edgewonk were rejected by this environment’s egress proxy (403), so their latest UI, subscription tiers, and pricing were not verified. Earlier general positioning is not presented as fresh research.
 
-| Reference                                 | Established emphasis                                   | What Daymark borrows                                                       | Current Daymark gap                                                |
-| ----------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| [TradeZella](https://www.tradezella.com/) | Trading performance review and structured journaling   | Results alongside guided reflection, screenshot attachments, weekly review | No trade replay, execution analytics, or automated broker import   |
-| [TraderSync](https://tradersync.com/)     | Performance analytics and identifying trading patterns | Setup and mistake tags, mindset tracking, weekly pattern counts            | No execution-level analysis, strategy backtesting, or integrations |
-| [Tradervue](https://www.tradervue.com/)   | Trade journaling, review, and reporting                | Date-based navigation, chart images, reusable reflection structure         | No fill imports, sharing, or trade-level reports                   |
+## Sources and useful lessons
 
-## Improvements implemented
+| Primary source reviewed                                                         | What its documentation describes                                                                                                                    | Practical lesson for Day 1                                                                                                           |
+| ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| [TradeNote README](https://github.com/Eleven-Trading/TradeNote#readme)          | A journal emphasizing privacy, simplicity, flexibility, recollecting trade patterns, and broker imports                                             | Make past reflections easy to find while keeping the local workflow simple                                                           |
+| [TradeTally README](https://github.com/GeneBO98/tradetally#readme)              | Trading analytics, behavior analysis, overconfidence/revenge-trading tracking, and health/performance analysis                                      | Review headspace alongside session results; do not reduce a session to one emotion                                                   |
+| [Deltalytix README](https://github.com/hugodemenez/deltalytix#readme)           | Rich journal entries with images and session tags, filtered reporting, and recurring-pattern review                                                 | Use notes, tags, and feelings as practical ways to retrieve and review sessions                                                      |
+| [LuxAlgo Trade Journal README](https://github.com/LuxAlgo/trade-journal#readme) | Searchable notes, templates, attachments, routines, rule checklists, adherence analysis, exports, and broker/CSV import with preview and validation | Combine reflection with a repeatable review routine, make scores explicit, and preserve data portability                             |
+| [Tradervue API documentation](https://github.com/tradervue/api-docs#readme)     | Separate APIs for trades, executions, journal entries, journal notes, and imports, with authentication requirements                                 | Keep session reflections distinct from execution-level data; importing fills and computing trade metrics needs a separate data model |
 
-1. **Reflection first:** a calendar opens directly to the selected day; all seven days remain visible in the weekly review.
-2. **A repeatable process:** pre-market plan, execution, lessons, and next-session intention provide structure beyond a blank notes box.
-3. **Process alongside results:** a four-rule checklist reports discipline across scored sessions, rather than equating a profitable day with good execution. Unscored sessions are explicitly excluded.
-4. **Patterns without a complex dashboard:** setup tags and mistake tags aggregate by day in weekly review. These counts describe frequency, not strategy profitability or causation.
-5. **Visual context:** screenshots are stored with the session and can be enlarged or removed.
-6. **Ownership and recovery:** local storage needs no account; backup export includes images, and validated restore merges by date after confirmation.
-7. **Safer editing:** explicit save, storage-failure feedback, numeric validation, delete confirmation, and unsaved-change protection.
-8. **Responsive design:** the same calendar and review work on mobile; navigation collapses into a drawer.
+These are documentation observations, not endorsements or claims of feature parity. No competitor code or visual assets were copied.
 
-## Suggested next stage
+## Implemented in this update
 
-Cloud sync with authentication and conflict handling, a trade-by-trade ledger, CSV imports with a preview/mapping step, configurable trading rules, and a custom reporting range. Those need separate product and storage decisions; the current build does not imply those capabilities.
+1. **Multiple feelings per session.** Select or deselect any combination of ten feelings. Existing single-feeling entries open with their original selection retained. Multi-feeling data persists across reload and backup/restore; the legacy `mood` string remains alongside `moods` for compatibility.
+2. **Weekly headspace summary.** Count sessions under each selected feeling and show their average daily net P&L. A session with multiple feelings appears under each; these overlapping groups must not be added together. This is descriptive, self-reported data with small samples, not causal analysis or a predictor.
+3. **Searchable journal.** Search all daily entries across dates, reflection text, feelings, setups, and mistakes. Filter by feeling and positive/negative/zero daily result. Open a matching day directly to review or edit it. Search runs entirely in the browser.
+4. **Saved weekly reflection.** Record what worked, what to improve, and one focus for next week. Each Monday-to-Sunday week has its own review. Drafts have a discard confirmation; saved reviews persist and are included in validated JSON backup export/restore. Old backups without reviews still import.
+5. **More honest discipline scores.** Explicitly mark a session’s rules reviewed. A reviewed session with no rules followed contributes 0/4 rather than disappearing from the denominator. Unreviewed sessions are excluded. Legacy entries with checked rules continue to count unless explicitly marked unreviewed. Only recognized rule checks affect the score.
+
+## Retained strengths
+
+The charcoal/grey interface, larger click targets, calendar navigation, seven-day overview, four guided daily reflection sections, chart screenshots, setup/mistake tags, explicit save, and local JSON backups remain in place. No account or third-party data transfer is required.
+
+## Best next additions, in order
+
+1. **Trade-by-trade ledger.** Record symbol, direction, quantity, entry/exit, timestamps, fees, and planned risk. Only then calculate profit factor, expectancy, average wins/losses, and R multiples from actual trade data. Do not invent these metrics from daily totals.
+2. **Custom playbooks and prompts.** Let the trader define setup rules and reflection sections. Store a version or snapshot of the rules used on each day so historical discipline scores remain meaningful after rules change.
+3. **CSV import with mapping and preview.** Validate timestamps/timezones, fees, quantities, and instruments; show errors and duplicates before saving. Avoid claiming universal broker support without tested sample formats.
+4. **Date-range reports.** Compare months or selected periods, with explicit sample counts and consistent session/trade-level definitions.
+5. **Optional cloud sync.** Add authentication, attachment storage, conflict handling, backups, and account deletion. This requires a backend and a hosting/privacy decision; it is not part of the current browser-only app.
+
+Broker sync, AI coaching, trade replay, automatic trade detection, and cloud sync are not implemented. Advanced features should follow reliable records and useful review habits rather than add complexity to the daily editor.

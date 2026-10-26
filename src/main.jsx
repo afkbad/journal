@@ -25,6 +25,7 @@ import {
   Menu,
   Plus,
   Smile,
+  Search,
   Target,
   Trash2,
   TrendingUp,
@@ -38,8 +39,16 @@ import {
   readJournal,
   writeJournal,
   makeDemo,
+  feelingsFor,
 } from "./store";
 import "./styles.css";
+import Modal from "./Modal";
+import {
+  SearchJournal,
+  FeelingsInsights,
+  WeeklyReview,
+  WeeklyReviewEditor,
+} from "./ReviewTools";
 
 const money = (n) =>
   `${n < 0 ? "−" : "+"}$${Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -81,13 +90,26 @@ const blank = (key) => ({
   trades: "",
   wins: "",
   mood: "",
+  moods: [],
+  processReviewed: false,
   plan: "",
   execution: "",
   lesson: "",
   tomorrow: "",
   images: [],
 });
-const moods = ["Focused", "Confident", "Patient", "Anxious", "Frustrated"];
+const moods = [
+  "Focused",
+  "Confident",
+  "Patient",
+  "Calm",
+  "Motivated",
+  "Anxious",
+  "Frustrated",
+  "Distracted",
+  "Impulsive",
+  "Tired",
+];
 function totals(entries) {
   return {
     pnl: entries.reduce((s, e) => s + Number(e.pnl), 0),
@@ -106,7 +128,9 @@ function App() {
     [editing, setEditing] = useState(null),
     [help, setHelp] = useState(false),
     [reset, setReset] = useState(false),
-    [mobile, setMobile] = useState(false);
+    [mobile, setMobile] = useState(false),
+    [searching, setSearching] = useState(false),
+    [reviewing, setReviewing] = useState(null);
   const addRef = useRef(null),
     importRef = useRef(null);
   const [importCandidate, setImportCandidate] = useState(null),
@@ -178,7 +202,15 @@ function App() {
           7,
       ) * 7;
   const calendarDays = daysFrom(start, count);
-  const edit = (key) => setEditing({ ...blank(key), ...data.entries[key] });
+  const edit = (key) =>
+    setEditing({
+      ...blank(key),
+      ...data.entries[key],
+      moods: feelingsFor(data.entries[key]),
+      processReviewed:
+        data.entries[key]?.processReviewed ??
+        !!data.entries[key]?.rules?.length,
+    });
   const importData = async (file) => {
     if (!file) return;
     try {
@@ -199,7 +231,7 @@ function App() {
           e.images.length > 10
         )
           throw new Error();
-        for (const field of ["plan", "execution", "lesson", "tomorrow", "mood"])
+        for (const field of ["plan", "execution", "lesson", "tomorrow"])
           if (typeof e[field] !== "string") throw new Error();
         for (const field of ["pnl", "trades", "wins"])
           if (
@@ -223,13 +255,40 @@ function App() {
             !/^data:image\/(png|jpeg|webp|gif);base64,/.test(image.url)
           )
             throw new Error();
-        for (const field of ["tags", "mistakes", "rules"])
+        if (e.mood !== undefined && typeof e.mood !== "string")
+          throw new Error();
+        if (
+          e.processReviewed !== undefined &&
+          typeof e.processReviewed !== "boolean"
+        )
+          throw new Error();
+        for (const field of ["tags", "mistakes", "rules", "moods"])
           if (
             e[field] !== undefined &&
             (!Array.isArray(e[field]) ||
               e[field].some((v) => typeof v !== "string"))
           )
             throw new Error();
+      }
+      if (next.weeklyReviews !== undefined) {
+        if (
+          !next.weeklyReviews ||
+          typeof next.weeklyReviews !== "object" ||
+          Array.isArray(next.weeklyReviews)
+        )
+          throw new Error();
+        for (const [key, review] of Object.entries(next.weeklyReviews)) {
+          if (
+            !/^\d{4}-\d{2}-\d{2}$/.test(key) ||
+            dateKey(fromKey(key)) !== key ||
+            fromKey(key).getDay() !== 1 ||
+            !review ||
+            typeof review !== "object"
+          )
+            throw new Error();
+          for (const field of ["wins", "improve", "nextWeek"])
+            if (typeof review[field] !== "string") throw new Error();
+        }
       }
       setImportCandidate(next);
     } catch {
@@ -301,6 +360,15 @@ function App() {
           >
             <BookOpen size={19} />
             Weekly review
+          </button>
+          <button
+            onClick={() => {
+              setMobile(false);
+              setSearching(true);
+            }}
+          >
+            <Search size={19} />
+            Search journal
           </button>
         </nav>
         <div className="sidebar-note">
@@ -541,9 +609,14 @@ function App() {
                                   ? "trade"
                                   : "trades"}
                               </span>
-                              <div className="day-mood">
+                              <div
+                                className="day-mood"
+                                title={feelingsFor(entry).join(", ")}
+                              >
                                 <span />
-                                {entry.mood || "Journaled"}
+                                {feelingsFor(entry).length
+                                  ? `${feelingsFor(entry)[0]}${feelingsFor(entry).length > 1 ? ` +${feelingsFor(entry).length - 1}` : ""}`
+                                  : "Journaled"}
                               </div>
                             </div>
                           ) : (
@@ -579,7 +652,9 @@ function App() {
                         </div>
                         <div className="weekly-text">
                           <h3>
-                            {e ? e.mood || "Session journal" : "A fresh page"}
+                            {e
+                              ? feelingsFor(e).join(" · ") || "Session journal"
+                              : "A fresh page"}
                           </h3>
                           <p>
                             {e
@@ -733,7 +808,17 @@ function App() {
               </section>
             </aside>
           </div>
-          {view === "week" && <WeeklyInsights entries={weekEntries} />}
+          {view === "week" && (
+            <>
+              <WeeklyInsights entries={weekEntries} />
+              <FeelingsInsights entries={weekEntries} />
+              <WeeklyReview
+                week={week}
+                review={data.weeklyReviews?.[dateKey(week)]}
+                onEdit={() => setReviewing(dateKey(week))}
+              />
+            </>
+          )}
           <footer className="page-footer">
             <span>
               <Activity size={14} />
@@ -768,6 +853,31 @@ function App() {
           }}
         />
       )}
+      {searching && (
+        <SearchJournal
+          entries={data.entries}
+          onClose={() => setSearching(false)}
+          onOpen={(key) => {
+            setSearching(false);
+            edit(key);
+          }}
+        />
+      )}
+      {reviewing && (
+        <WeeklyReviewEditor
+          key={reviewing}
+          weekKey={reviewing}
+          review={data.weeklyReviews?.[reviewing]}
+          onClose={() => setReviewing(null)}
+          onSave={async (review) => {
+            await persist({
+              ...data,
+              weeklyReviews: { ...data.weeklyReviews, [reviewing]: review },
+            });
+            setReviewing(null);
+          }}
+        />
+      )}
       {importCandidate && (
         <Modal
           title="Restore your journal"
@@ -775,7 +885,9 @@ function App() {
         >
           <p>
             This backup contains {Object.keys(importCandidate.entries).length}{" "}
-            entries. They will merge with your current journal. For dates in
+            daily entries and{" "}
+            {Object.keys(importCandidate.weeklyReviews || {}).length} weekly
+            reviews. They will merge with your current journal. For dates in
             both, the backup entry will replace the current entry.
           </p>
           <p className="storage-note">
@@ -786,12 +898,17 @@ function App() {
             onClick={async () => {
               try {
                 await persist({
+                  ...data,
                   entries: { ...data.entries, ...importCandidate.entries },
+                  weeklyReviews: {
+                    ...data.weeklyReviews,
+                    ...importCandidate.weeklyReviews,
+                  },
                   demo: !!(data.demo && importCandidate.demo),
                 });
                 setImportCandidate(null);
                 setNotice(
-                  "Backup restored. Your entries and images are saved.",
+                  "Backup restored. Your entries, images and weekly reviews are saved.",
                 );
               } catch {
                 setNotice(
@@ -876,7 +993,7 @@ function App() {
 }
 function WeeklyInsights({ entries }) {
   const counts = (field) => {
-    const all = {};
+    const all = Object.create(null);
     entries.forEach((e) =>
       (e[field] || []).forEach((t) => {
         all[t] = (all[t] || 0) + 1;
@@ -886,8 +1003,15 @@ function WeeklyInsights({ entries }) {
   };
   const tagCounts = counts("tags"),
     mistakeCounts = counts("mistakes"),
-    checked = entries.reduce((n, e) => n + (e.rules?.length || 0), 0),
-    scored = entries.filter((e) => e.rules?.length).length;
+    checked = entries
+      .filter((e) => e.processReviewed ?? !!e.rules?.length)
+      .reduce(
+        (n, e) => n + rules.filter((rule) => e.rules?.includes(rule)).length,
+        0,
+      ),
+    scored = entries.filter(
+      (e) => e.processReviewed ?? !!e.rules?.length,
+    ).length;
   return (
     <section className="insights-panel">
       <div className="insights-heading">
@@ -910,8 +1034,8 @@ function WeeklyInsights({ entries }) {
           </strong>
           <p>
             {scored
-              ? `${checked} of ${scored * rules.length} rules followed across ${scored} scored sessions.`
-              : "Check off your trading rules in each entry to track your process."}
+              ? `${checked} of ${scored * rules.length} rules followed across ${scored} scored ${scored === 1 ? "session" : "sessions"}.`
+              : "Mark a session as reviewed in your daily entry to track your process. Zero-rule sessions count too."}
           </p>
         </div>
         <div>
@@ -1030,83 +1154,14 @@ function Stat({
     </div>
   );
 }
-function Modal({ title, onClose, children, wide = false }) {
-  const ref = useRef(null),
-    closeRef = useRef(onClose);
-  closeRef.current = onClose;
-  useEffect(() => {
-    const previous = document.activeElement;
-    const old = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    ref.current?.focus();
-    const handler = (e) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        closeRef.current();
-      }
-      if (e.key === "Tab") {
-        const nodes = ref.current?.querySelectorAll(
-          'button, input, textarea, select, a[href], [tabindex="0"]',
-        );
-        if (!nodes?.length) return;
-        const first = nodes[0],
-          last = nodes[nodes.length - 1];
-        if (
-          e.shiftKey &&
-          (document.activeElement === first ||
-            document.activeElement === ref.current)
-        ) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    };
-    document.addEventListener("keydown", handler);
-    return () => {
-      document.body.style.overflow = old;
-      document.removeEventListener("keydown", handler);
-      previous?.focus();
-    };
-  }, []);
-  return (
-    <div
-      className={`modal-backdrop ${wide ? "drawer-backdrop" : ""}`}
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <section
-        className={`modal ${wide ? "editor-drawer" : ""}`}
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        ref={ref}
-        tabIndex={-1}
-      >
-        <div className="modal-title">
-          <h2>{title}</h2>
-          <button
-            aria-label="Close dialog"
-            className="icon-button"
-            onClick={onClose}
-          >
-            <X size={20} />
-          </button>
-        </div>
-        {children}
-      </section>
-    </div>
-  );
-}
 function EntryEditor({ entry, isNew, demo, onSave, onDelete, onClose }) {
   const [draft, setDraft] = useState({
       ...entry,
       tags: entry.tags || [],
       mistakes: entry.mistakes || [],
       rules: entry.rules || [],
+      moods: feelingsFor(entry),
+      processReviewed: entry.processReviewed ?? !!entry.rules?.length,
     }),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
@@ -1117,7 +1172,11 @@ function EntryEditor({ entry, isNew, demo, onSave, onDelete, onClose }) {
     [discard, setDiscard] = useState(false);
   const fileRef = useRef(null),
     change = (field, value) => {
-      setDraft((d) => ({ ...d, [field]: value }));
+      setDraft((d) => ({
+        ...d,
+        [field]: value,
+        ...(field === "rules" ? { processReviewed: true } : {}),
+      }));
       setDirty(true);
     };
   const close = () => {
@@ -1190,7 +1249,7 @@ function EntryEditor({ entry, isNew, demo, onSave, onDelete, onClose }) {
     }
     setBusy(true);
     try {
-      await onSave(draft);
+      await onSave({ ...draft, mood: draft.moods.join(", ") });
     } catch {
       setError(
         "Your journal could not be saved. Browser storage may be full. Try removing an image or exporting a backup.",
@@ -1262,18 +1321,18 @@ function EntryEditor({ entry, isNew, demo, onSave, onDelete, onClose }) {
             <Smile size={18} />
             Your headspace<span>02</span>
           </h3>
-          <p>How did you feel during the session?</p>
+          <p>How did you feel during the session? Select all that apply.</p>
           <div className="mood-options">
             {moods.map((m) => (
               <button
                 type="button"
                 key={m}
-                className={draft.mood === m ? "chosen" : ""}
-                aria-pressed={draft.mood === m}
-                onClick={() => change("mood", draft.mood === m ? "" : m)}
+                className={draft.moods.includes(m) ? "chosen" : ""}
+                aria-pressed={draft.moods.includes(m)}
+                onClick={() => toggle("moods", m)}
               >
                 {m}
-                {draft.mood === m && <Check size={13} />}
+                {draft.moods.includes(m) && <Check size={13} />}
               </button>
             ))}
           </div>
@@ -1317,6 +1376,20 @@ function EntryEditor({ entry, isNew, demo, onSave, onDelete, onClose }) {
               {draft.rules.length} / {rules.length}
             </span>
           </div>
+          <label className="process-reviewed">
+            <input
+              type="checkbox"
+              checked={draft.processReviewed}
+              onChange={(e) => change("processReviewed", e.target.checked)}
+            />
+            <span>
+              I’ve reviewed this session’s rules
+              <span>
+                Includes this session in weekly discipline, even with zero rules
+                followed.
+              </span>
+            </span>
+          </label>
           <div className="rule-list">
             {rules.map((rule) => (
               <label key={rule}>

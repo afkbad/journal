@@ -2048,3 +2048,256 @@ textarea {
     scroll-behavior: auto !important;
   }
 }
+/* Review tools share the same spacious controls and muted dark palette. */
+.process-reviewed {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #56695d;
+  background: #2c3730;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  line-height: 1.6;
+}
+.process-reviewed input {
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  margin: 2px 0 0;
+  flex-shrink: 0;
+  accent-color: #b6cbbc;
+}
+.process-reviewed > span > span {
+  display: block;
+  font-size: 12px;
+  color: #adbaaf;
+  margin-top: 5px;
+}
+.day-mood {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.weekly-text h3 {
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.search-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #181c21;
+  border: 1px solid #687586;
+  border-radius: 8px;
+  padding: 0 14px;
+  color: #a8b8cb;
+}
+.search-input:focus-within {
+  outline: 2px solid #b4c7d9;
+}
+.search-input input {
+  border: 0;
+  background: transparent;
+  margin: 0;
+  padding: 15px 0;
+  box-shadow: none;
+}
+.search-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 20px;
+}
+select {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  background: #292f36;
+  border: 1px solid #596573;
+  border-radius: 8px;
+  color: #e1e3e7;
+  padding: 10px 12px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+select:focus-visible {
+  outline: 3px solid #b4c7d9;
+  outline-offset: 2px;
+}
+.search-count {
+  font-size: 12px !important;
+  color: #a7b5c5 !important;
+  margin: 22px 0 14px;
+}
+.search-results {
+  max-height: 42dvh;
+  overflow-y: auto;
+  scrollbar-color: #606974 #25292f;
+}
+.search-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  text-align: left;
+  padding: 18px 10px;
+  border-top: 1px solid #414b57;
+  min-height: 100px;
+  border-radius: 6px;
+}
+.search-result:hover {
+  background: #303b47;
+}
+.search-result > div {
+  min-width: 0;
+  flex: 1;
+}
+.search-result strong {
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+}
+.search-result > div > span {
+  display: block;
+  font-size: 12px;
+  color: #b6c9be;
+  margin-top: 8px;
+  line-height: 1.6;
+}
+.search-result p {
+  font-size: 13px;
+  margin: 8px 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #a7b4c4;
+}
+.search-result > span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.search-empty {
+  padding: 30px 10px;
+  text-align: center;
+  color: #a8b9cd;
+}
+.search-empty h3 {
+  font-size: 18px;
+  font-weight: 500;
+  margin-top: 18px;
+}
+.feelings-table-header,
+.feelings-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px 140px;
+  gap: 20px;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #3d4651;
+}
+.feelings-table-header {
+  font-size: 12px;
+  color: #acb6c4;
+  margin-top: 25px;
+}
+.feelings-table-header > span:last-child,
+.feelings-row > strong {
+  text-align: right;
+}
+.feelings-row {
+  font-size: 14px;
+}
+.feelings-row > strong {
+  font-weight: 500;
+}
+.insight-footnote {
+  font-size: 13px;
+  color: #a6b4c3;
+  line-height: 1.8;
+  margin: 20px 0 0;
+}
+.weekly-reflection .secondary {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.week-range-label {
+  font-size: 13px;
+  color: #a8b8c5;
+  margin: 18px 0 0;
+}
+.review-notes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+  margin-top: 25px;
+}
+.review-notes > div + div {
+  border-left: 1px solid #414a55;
+  padding-left: 26px;
+}
+.review-notes h3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #c2d4c8;
+  line-height: 1.6;
+}
+.review-notes p {
+  font-size: 14px;
+  color: #bac3d0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+  margin-bottom: 0;
+}
+@media (max-width: 850px) {
+  .weekly-reflection .insights-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .review-notes {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .review-notes > div + div {
+    border-left: 0;
+    border-top: 1px solid #414a55;
+    padding: 20px 0 0;
+  }
+}
+@media (max-width: 700px) {
+  .feelings-table-header,
+  .feelings-row {
+    grid-template-columns: minmax(0, 1fr) 64px 110px;
+    gap: 8px;
+  }
+  .feelings-table-header {
+    font-size: 11px;
+  }
+  .feelings-row {
+    font-size: 13px;
+  }
+  .weekly-reflection .secondary {
+    font-size: 13px;
+  }
+  .editor-save > span {
+    max-width: 120px;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .search-result {
+    padding: 18px 5px;
+  }
+  .search-filters {
+    gap: 12px;
+  }
+  .search-result strong {
+    font-size: 13px;
+  }
+}

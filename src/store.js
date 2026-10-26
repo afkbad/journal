@@ -100,3 +100,19 @@ export function makeDemo() {
   );
   return { entries, demo: true };
 }
+
+// Preserve the original database and legacy single-feeling entries. No destructive migration.
+export function feelingsFor(entry) {
+  const values = Array.isArray(entry?.moods)
+    ? entry.moods
+    : entry?.mood
+      ? [entry.mood]
+      : [];
+  return [
+    ...new Set(
+      values
+        .filter((value) => typeof value === "string" && value.trim())
+        .map((value) => value.trim()),
+    ),
+  ];
+}
